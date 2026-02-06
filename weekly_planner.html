@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Study Planner - Weekly</title>
+  <style>
+    :root{
+      --primary:#4f46e5;
+      --accent:#10b981;
+      --card:#ffffffd9;
+      --bg:#eef2ff;
+      --muted:#6b7280;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Tahoma, sans-serif;
+      background: 
+        linear-gradient(rgba(255,255,255,0.85), rgba(240,240,255,0.9)),
+        url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1400&q=60');
+      background-size:cover;
+      background-attachment: fixed;
+      background-position:center;
+      color:#111827;
+      min-height:100vh;
+    }
+
+    header{
+      background: linear-gradient(90deg,var(--primary), #6d28d9);
+      color:white;
+      padding:16px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow: 0 6px 18px rgba(79,70,229,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1{margin:0;font-size:1.5rem}
+    .menu-icon{font-size:1.5rem;cursor:pointer;}
+    .tiny{font-size:0.9rem;opacity:0.9;}
+
+    /* Navigation Overlay */
+    .overlay {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 200;
+      top: 0;
+      left: 0;
+      background-color: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      overflow-x: hidden;
+      transition: 0.4s;
+    }
+    .overlay-content {
+      position: relative;
+      top: 25%;
+      width: 100%;
+      text-align: center;
+    }
+    .overlay a {
+      padding: 14px;
+      text-decoration: none;
+      font-size: 28px;
+      color: #eef2ff;
+      display: block;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+    .overlay a:hover {color: #ffffff; transform: scale(1.05);}
+    .overlay .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 45px;
+      font-size: 60px;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    main{max-width:1200px;margin:40px auto;padding:0 20px;}
+    .card{
+      background:var(--card);
+      border-radius:18px;
+      padding:24px;
+      box-shadow:0 10px 30px rgba(15,23,42,0.12);
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+    }
+    .card:hover {transform: translateY(-3px);}
+    
+    .grid-planner {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 30px;
+    }
+    @media(max-width: 1024px) { .grid-planner { grid-template-columns: 1fr; } }
+
+    .settings-btn {
+        background: var(--primary); color: white; border: none; padding: 12px 18px;
+        border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%;
+        transition: 0.3s;
+    }
+    .settings-btn:hover {background:#4338ca;}
+    .accent-btn{background:var(--accent);}
+    .accent-btn:hover{background:#059669;}
+
+    .subject-list ul { list-style: none; padding: 0; margin: 0; }
+    .subject-list li {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px; border-bottom: 1px solid #e5e7eb;
+    }
+    .delete-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; }
+
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+    }
+    .day-column h3 { text-transform: capitalize; border-bottom: 3px solid var(--primary); padding-bottom: 8px;}
+    .session-card {
+        background: #f7f8ff; border-left: 5px solid var(--primary);
+        padding: 10px; border-radius: 10px; margin-bottom: 10px;
+    }
+    .session-card.difficulty-Hard { border-left-color: #ef4444; }
+    .session-card.difficulty-Medium { border-left-color: #f59e0b; }
+    .session-card.difficulty-Easy { border-left-color: #10b981; }
+
+    .modal {
+        display: none; position: fixed; z-index: 300; left: 0; top: 0; width: 100%; height: 100%;
+        overflow: auto; background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+        background-color: #fefefe; margin: 10% auto; padding: 20px;
+        border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 12px;
+    }
+    .close-modal { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close-modal:hover{color:#000;}
+  </style>
+</head>
+<body>
+
+  <!-- Overlay Navigation -->
+  <div id="myNav" class="overlay">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div class="overlay-content">
+      <a href="./input_design_trial2.html">Daily Study Planner</a>
+      <a href="./weekly_planner.html">Weekly Schedule Planner</a>
+    </div>
+  </div>
+
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="menu-icon" onclick="openNav()">&#9776;</span>
+      <h1>Weekly Planner</h1>
+    </div>
+    <div class="tiny">Creators: 10 Amrut Dabir • 59 Rushikesh Katare</div>
+  </header>
+
+  <main>
+    <div class="grid-planner">
+      <!-- Controls -->
+      <div class="card">
+        <h2>Controls</h2>
+        <button id="settingsBtn" class="settings-btn">Study Settings</button>
+        <hr style="margin:20px 0;">
+        <h3>Add Subjects</h3>
+        <form id="addSubjectForm">
+          <input type="text" id="subjectName" placeholder="Subject Name" required style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid #ddd;">
+          <input type="number" id="subjectHours" placeholder="Total Hours" required min="1" style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid #ddd;">
+          <select id="subjectDifficulty" required style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid #ddd;">
+            <option>Easy</option><option selected>Medium</option><option>Hard</option>
+          </select>
+          <button type="submit" class="settings-btn accent-btn">Add Subject</button>
+        </form>
+        <div id="subject-list-card" class="card subject-list" style="margin-top:14px; display:none;">
+          <h3>Your Subjects</h3>
+          <ul id="subjectList"></ul>
+          <button id="generateScheduleBtn" class="settings-btn" style="margin-top:15px;">Generate Weekly Schedule</button>
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="card">
+        <h2>Your Weekly Schedule</h2>
+        <div id="scheduleView" class="schedule-grid">
+          <p class="small">Add subjects and set your schedule, then click “Generate Weekly Schedule”.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2>Study Settings</h2>
+      <form id="settingsForm">
+        <label>Daily Study Hours (Max)</label>
+        <input type="number" id="dailyHours" value="8" min="1" max="16" style="width:100%;margin-bottom:15px;padding:8px;border-radius:6px;border:1px solid #ddd;">
+        <label>Study Start Time</label>
+        <input type="time" id="startTime" value="09:00" style="width:100%;margin-bottom:15px;padding:8px;border-radius:6px;border:1px solid #ddd;">
+        <label>Study Days</label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px;">
+          <span>Mon <input type="checkbox" id="day-mon" checked></span>
+          <span>Tue <input type="checkbox" id="day-tue" checked></span>
+          <span>Wed <input type="checkbox" id="day-wed" checked></span>
+          <span>Thu <input type="checkbox" id="day-thu" checked></span>
+          <span>Fri <input type="checkbox" id="day-fri" checked></span>
+          <span>Sat <input type="checkbox" id="day-sat"></span>
+          <span>Sun <input type="checkbox" id="day-sun"></span>
+        </div>
+        <button type="submit" class="settings-btn">Save Settings</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  // --- Navigation Overlay Controls ---
+  function openNav(){document.getElementById("myNav").style.width="100%";}
+  function closeNav(){document.getElementById("myNav").style.width="0%";}
+
+  // --- Offline JS version of weekly_ml.generate_schedule ---
+  function generateSchedule(settings, subjects) {
+    const maxDailyHours = parseFloat(settings.daily_study_hours) || 8;
+    const [startHour, startMinute] = (settings.start_time || "09:00").split(":").map(Number);
+    const studyDays = Object.entries(settings.study_days).filter(([_, v]) => v).map(([k]) => k);
+    if (studyDays.length === 0) return {};
+
+    const diffOrder = {Hard:3, Medium:2, Easy:1};
+    let blocks = [];
+    subjects.forEach(sub => {
+      const hrs = Math.round(sub.total_hours || 1);
+      for (let i=0;i<hrs;i++){
+        blocks.push({subject:sub.subject_name,difficulty:sub.difficulty,priority:diffOrder[sub.difficulty]||2});
+      }
+    });
+    blocks.sort((a,b)=>b.priority - a.priority);
+
+    const schedule = {};
+    studyDays.forEach(d=>schedule[d]=[]);
+    let dailyHours = {}; studyDays.forEach(d=>dailyHours[d]=0);
+    let idx=0;
+
+    const fmt=(h,m)=>`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    blocks.forEach(block=>{
+      for(let t=0;t<studyDays.length;t++){
+        const day=studyDays[idx];
+        if(dailyHours[day]<maxDailyHours){
+          const h=startHour+dailyHours[day];
+          block.start_time=fmt(h,startMinute);
+          block.end_time=fmt(h+1,startMinute);
+          schedule[day].push({...block});
+          dailyHours[day]+=1;
+          idx=(idx+1)%studyDays.length;
+          return;
+        }
+        idx=(idx+1)%studyDays.length;
+      }
+    });
+    return schedule;
+  }
+
+  // --- Page Logic ---
+  document.addEventListener('DOMContentLoaded', ()=>{
+    let weeklySubjects = [];
+    let studySettings = {
+      daily_study_hours:8,
+      start_time:"09:00",
+      study_days:{mon:true,tue:true,wed:true,thu:true,fri:true,sat:false,sun:false}
+    };
+
+    const modal=document.getElementById('settingsModal');
+    const settingsBtn=document.getElementById('settingsBtn');
+    const closeModal=document.querySelector('.close-modal');
+    const settingsForm=document.getElementById('settingsForm');
+    const addSubjectForm=document.getElementById('addSubjectForm');
+    const subjectList=document.getElementById('subjectList');
+    const subjectListCard=document.getElementById('subject-list-card');
+    const generateScheduleBtn=document.getElementById('generateScheduleBtn');
+    const scheduleView=document.getElementById('scheduleView');
+
+    settingsBtn.onclick=()=>modal.style.display='block';
+    closeModal.onclick=()=>modal.style.display='none';
+    window.onclick=e=>{if(e.target==modal)modal.style.display='none';};
+
+    settingsForm.addEventListener('submit',e=>{
+      e.preventDefault();
+      studySettings.daily_study_hours=document.getElementById('dailyHours').value;
+      studySettings.start_time=document.getElementById('startTime').value;
+      studySettings.study_days={
+        mon: document.getElementById('day-mon').checked,
+        tue: document.getElementById('day-tue').checked,
+        wed: document.getElementById('day-wed').checked,
+        thu: document.getElementById('day-thu').checked,
+        fri: document.getElementById('day-fri').checked,
+        sat: document.getElementById('day-sat').checked,
+        sun: document.getElementById('day-sun').checked
+      };
+      modal.style.display='none';
+    });
+
+    addSubjectForm.addEventListener('submit',e=>{
+      e.preventDefault();
+      const sub={
+        id:Date.now(),
+        subject_name:subjectName.value,
+        total_hours:parseFloat(subjectHours.value),
+        difficulty:subjectDifficulty.value
+      };
+      weeklySubjects.push(sub);
+      renderSubjects();
+      addSubjectForm.reset();
+    });
+
+    function renderSubjects(){
+      subjectList.innerHTML='';
+      subjectListCard.style.display=weeklySubjects.length>0?'block':'none';
+      weeklySubjects.forEach(sub=>{
+        const li=document.createElement('li');
+        li.innerHTML=`<span><strong>${sub.subject_name}</strong> (${sub.total_hours}h, ${sub.difficulty})</span>
+                      <button class="delete-btn" data-id="${sub.id}">&times;</button>`;
+        subjectList.appendChild(li);
+      });
+    }
+
+    subjectList.addEventListener('click',e=>{
+      if(e.target.classList.contains('delete-btn')){
+        const id=parseInt(e.target.getAttribute('data-id'));
+        weeklySubjects=weeklySubjects.filter(s=>s.id!==id);
+        renderSubjects();
+      }
+    });
+
+    generateScheduleBtn.addEventListener('click',()=>{
+      if(weeklySubjects.length===0){alert("Please add at least one subject.");return;}
+      const schedule=generateSchedule(studySettings,weeklySubjects);
+      renderSchedule(schedule);
+    });
+
+    function renderSchedule(schedule){
+      scheduleView.innerHTML='';
+      Object.keys(schedule).forEach(day=>{
+        const dayColumn=document.createElement('div');
+        dayColumn.className='day-column';
+        let html=`<h3>${day}</h3>`;
+        if(schedule[day].length===0) html+='<div class="small">No sessions</div>';
+        schedule[day].forEach(s=>{
+          html+=`<div class="session-card difficulty-${s.difficulty}">
+                   <strong>${s.subject}</strong>
+                   <div class="small">${s.start_time} - ${s.end_time}</div>
+                 </div>`;
+        });
+        dayColumn.innerHTML=html;
+        scheduleView.appendChild(dayColumn);
+      });
+    }
+  });
+  </script>
+</body>
+</html>

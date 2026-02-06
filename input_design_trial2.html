@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Study Planner - Daily</title>
+  <style>
+    :root{
+      --primary:#4f46e5;
+      --accent:#10b981;
+      --card:#ffffff;
+      --bg:#f6f8fb;
+      --muted:#6b7280;
+      --glass: rgba(255,255,255,0.7);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Tahoma, sans-serif;
+      background: linear-gradient(180deg,var(--bg), #eef2ff 120%);
+      color:#111827;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    header{
+      background: linear-gradient(90deg,var(--primary), #6d28d9);
+      color:white;
+      padding:14px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      box-shadow: 0 6px 18px rgba(79,70,229,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1{margin:0;font-size:1.25rem;letter-spacing:0.2px}
+    .menu-icon{font-size:1.4rem;cursor:pointer;opacity:0.95}
+
+    /* --- NEW Navigation Menu Styles --- */
+    .overlay {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 200;
+      top: 0;
+      left: 0;
+      background-color: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(5px);
+      overflow-x: hidden;
+      transition: 0.4s;
+    }
+    .overlay-content {
+      position: relative;
+      top: 25%;
+      width: 100%;
+      text-align: center;
+      margin-top: 30px;
+    }
+    .overlay a {
+      padding: 12px;
+      text-decoration: none;
+      font-size: 28px;
+      color: #eef2ff;
+      display: block;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+    .overlay a:hover, .overlay a:focus {
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+    .overlay .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 45px;
+      font-size: 60px;
+      color: #fff;
+    }
+    @media screen and (max-height: 450px) {
+      .overlay a {font-size: 20px}
+      .overlay .closebtn {
+        font-size: 40px;
+        top: 15px;
+        right: 35px;
+      }
+    }
+    /* --- END Navigation Menu Styles --- */
+
+    main{max-width:980px;margin:26px auto;padding:0 16px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap:18px;
+    }
+    @media (max-width:920px){ .grid{grid-template-columns: 1fr} }
+
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:18px;
+      box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+    }
+
+    .small{font-size:0.9rem;color:var(--muted)}
+    .lead{font-weight:600;margin-bottom:6px}
+
+    form#studyForm{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    label.field{display:block;font-size:0.85rem;color:#374151;margin-bottom:6px}
+    input[type="text"], input[type="number"], select{
+      padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef;
+      width:100%;font-size:0.98rem;
+      outline:none;transition:box-shadow .12s ease, border-color .12s ease;
+      background:transparent;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus{
+      border-color: rgba(79,70,229,0.9);
+      box-shadow: 0 6px 18px rgba(79,70,229,0.06);
+    }
+
+    .submit-btn{
+      padding:10px 16px;border-radius:9px;border:none;
+      background:var(--primary);color:white;font-weight:600;cursor:pointer;
+      box-shadow: 0 8px 18px rgba(79,70,229,0.12);
+    }
+    .predict-btn{background:var(--accent); margin-left: 0; border:none; color:white; padding:10px 14px; border-radius:9px; font-weight:600; cursor:pointer}
+
+    .days-wrap{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .days-btn{
+      background:linear-gradient(90deg,#f3f4f6,#ffffff);
+      border:1px solid #e5e7eb;
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+    }
+    .days-display{
+      min-width:56px;text-align:center;padding:8px;border-radius:8px;border:1px dashed #e6e9ef;background:#fafafa;font-weight:700;
+    }
+    .tiny{font-size:0.85rem;color:var(--muted)}
+
+    #resultCard{margin-top:12px;padding:12px;border-radius:10px;border:1px solid #eef2ff;background:linear-gradient(180deg,#fbfdff,#ffffff)}
+    #resultCard h3{margin:0 0 8px 0}
+    #logList{padding-left:0; margin:0; list-style:none}
+    #logList li{padding:10px;border-bottom:1px solid #f1f5f9;font-size:0.95rem}
+
+    .aside-title{font-weight:700;margin-bottom:6px}
+    .chip{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #eef2ff;margin:4px 4px 4px 0;background:#fff;font-size:0.85rem}
+
+    footer{max-width:980px;margin:16px auto;padding:0 16px;color:var(--muted);font-size:0.9rem}
+  </style>
+</head>
+<body>
+
+  <!-- NEW Navigation Overlay -->
+  <div id="myNav" class="overlay">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div class="overlay-content">
+      <a href="./input_design_trial2.html">Daily Study Planner</a>
+      <a href="./weekly_planner.html">Weekly Schedule Planner</a>
+    </div>
+  </div>
+
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <!-- UPDATED menu icon to call openNav() -->
+      <span class="menu-icon" onclick="openNav()">&#9776;</span>
+      <h1>AI Study Planner</h1>
+    </div>
+    <div class="tiny">Creators: 10 Amrut Dabir • 59 Rushikesh Katare</div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- MAIN COLUMN -->
+      <div>
+        <div id="inputCard" class="card">
+          <h2 style="margin:0 0 6px 0">Daily Study Planner</h2>
+          <p class="small">Enter a subject, total study hours, difficulty, and days remaining to get a daily study recommendation.</p>
+          <form id="studyForm">
+            <!-- Form content remains the same... -->
+            <div>
+              <label class="field" for="subject">Subject</label>
+              <input id="subject" type="text" placeholder="e.g. Maths" required />
+            </div>
+            <div>
+              <label class="field" for="hours">Total Study Hours</label>
+              <input id="hours" type="number" min="1" step="0.5" placeholder="e.g. 6" required />
+            </div>
+            <div>
+              <label class="field" for="difficulty">Difficulty Level</label>
+              <select id="difficulty" required>
+                <option>Easy</option>
+                <option selected>Medium</option>
+                <option>Hard</option>
+              </select>
+            </div>
+            <div>
+              <label class="field">Days remaining</label>
+              <div class="days-wrap">
+                <button type="button" id="decreaseDays" class="days-btn">−</button>
+                <div class="days-display" id="daysDisplay">7</div>
+                <button type="button" id="increaseDays" class="days-btn">+</button>
+              </div>
+              <input id="daysRemaining" name="days_remaining" type="hidden" value="7" />
+              <div class="tiny" style="margin-top:8px">Set how many days until your target date.</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <button class="submit-btn" type="submit">Submit</button>
+              <button id="predictBtn" type="button" class="predict-btn">Get Prediction</button>
+            </div>
+            <div id="resultCard" style="display:none">
+              <h3 id="resultTitle">Recommendation</h3>
+              <div id="resultText" style="white-space:pre-wrap"></div>
+            </div>
+          </form>
+        </div>
+        <div id="logsCard" class="card" style="margin-top:14px">
+          <h3 style="margin:0 0 8px 0">Activity Logs</h3>
+          <p class="small">History of entries submitted from this page.</p>
+          <ul id="logList"></ul>
+        </div>
+      </div>
+      <!-- SIDEBAR -->
+      <aside>
+        <div class="card">
+          <div class="aside-title">Quick Tips</div>
+          <div class="small">Preferred subjects for offline predictions:</div>
+          <div style="margin-top:8px">
+            <span class="chip">Maths</span><span class="chip">Science</span><span class="chip">English</span><span class="chip">Social Studies</span>
+          </div>
+          <hr style="margin:12px 0;border:none;border-top:1px solid #f1f5f9" />
+          <div class="small"><b>How predictions work:</b></div>
+          <div class="tiny" style="margin-top:8px">The offline model uses simple rules based on your inputs to suggest a daily study time and provide revision tips.</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>AI Study Planner Project</footer>
+
+  <script>
+    // --- NEW Navigation Functions ---
+    function openNav() {
+      document.getElementById("myNav").style.width = "100%";
+    }
+    function closeNav() {
+      document.getElementById("myNav").style.width = "0%";
+    }
+
+    const API_ROOT = "http://127.0.0.1:5000/api";
+
+    // --- UI: Days remaining controls ---
+    const daysDisplay = document.getElementById('daysDisplay');
+    const daysInput = document.getElementById('daysRemaining');
+    const inc = document.getElementById('increaseDays');
+    const dec = document.getElementById('decreaseDays');
+
+    function setDays(n){
+      n = Math.max(1, Math.min(365, Math.round(n))); // clamp
+      daysDisplay.textContent = n;
+      daysInput.value = n;
+    }
+    inc.addEventListener('click', () => setDays(parseInt(daysDisplay.textContent || '7') + 1));
+    dec.addEventListener('click', () => setDays(parseInt(daysDisplay.textContent || '7') - 1));
+
+    // --- Local logs (frontend session) ---
+    const logList = document.getElementById('logList');
+    function addLogRow(entry){
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${entry.subject}</strong> • ${entry.hours}h • ${entry.difficulty} • ${entry.days_remaining} day(s)`;
+      logList.prepend(li);
+    }
+    
+    // Submit form -> calls /api/study (POST)
+    document.getElementById('studyForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const payload = {
+        subject: document.getElementById('subject').value.trim(),
+        hours: parseFloat(document.getElementById('hours').value),
+        difficulty: document.getElementById('difficulty').value,
+        days_remaining: parseInt(document.getElementById('daysRemaining').value)
+      };
+
+      addLogRow(payload);
+
+      try {
+        const res = await fetch(`${API_ROOT}/study`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          console.warn('Server responded with', res.status);
+        }
+      } catch (err) {
+        console.warn('Could not reach API server:', err);
+      }
+    });
+
+    // Get Prediction -> calls /api/predict
+    document.getElementById('predictBtn').addEventListener('click', async function(){
+      const subject = document.getElementById('subject').value.trim();
+      const hours = parseFloat(document.getElementById('hours').value);
+      const difficulty = document.getElementById('difficulty').value;
+      const days_remaining = parseInt(document.getElementById('daysRemaining').value);
+
+      if (!subject || !hours || hours <= 0) { return; }
+
+      try {
+        const res = await fetch(`${API_ROOT}/predict`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({subject, difficulty, hours, days_remaining})
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(JSON.stringify(json));
+        showResult(json.recommendation_text || JSON.stringify(json));
+      } catch (err) {
+        console.warn('Server predict failed, using client fallback:', err);
+      }
+    });
+
+    function showResult(text){
+      const card = document.getElementById('resultCard');
+      const txt = document.getElementById('resultText');
+      card.style.display = 'block';
+      txt.textContent = text;
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+    
+    // On load
+    (function init(){
+      setDays(7);
+    })();
+  </script>
+</body>
+</html>
+

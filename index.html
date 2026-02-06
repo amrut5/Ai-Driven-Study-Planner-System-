@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Study Planner - Welcome</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --accent: #10b981;
+      --text-dark: #1f2937;
+      --muted: #6b7280;
+      --bg: #eef2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+      background: linear-gradient(
+          rgba(255, 255, 255, 0.8),
+          rgba(240, 240, 255, 0.9)
+        ),
+        url("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1400&q=60");
+      background-size: cover;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: var(--text-dark);
+      overflow: hidden;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 40px 60px;
+      border-radius: 24px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(8px);
+      max-width: 600px;
+      animation: fadeIn 1s ease-in;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.4em;
+      letter-spacing: 1px;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 2em;
+      font-size: 1.05rem;
+    }
+
+    .btn {
+      display: block;
+      margin: 10px auto;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      border-radius: 12px;
+      width: 80%;
+      transition: 0.3s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-daily {
+      background: var(--accent);
+    }
+    .btn-daily:hover {
+      background: #059669;
+    }
+
+    .btn-weekly {
+      background: var(--primary);
+    }
+    .btn-weekly:hover {
+      background: #4338ca;
+    }
+
+    .btn-about {
+      background: #f59e0b;
+    }
+    .btn-about:hover {
+      background: #d97706;
+    }
+
+    .btn-credits {
+      background: #ef4444;
+    }
+    .btn-credits:hover {
+      background: #dc2626;
+    }
+
+    .quote {
+      margin-top: 2em;
+      font-style: italic;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 480px;
+      margin: 10% auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .close-btn {
+      float: right;
+      font-size: 24px;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: black;
+    }
+
+    .exit {
+      background: #111827;
+    }
+    .exit:hover {
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Study Planner</h1>
+    <p>Welcome to your all-in-one offline study assistant! Choose how you'd like to plan your learning journey.</p>
+
+    <a href="./input_design_trial2.html" class="btn btn-daily">🗓 Daily Study Planner</a>
+    <a href="./weekly_planner.html" class="btn btn-weekly">📅 Weekly Schedule Planner</a>
+    <button id="aboutBtn" class="btn btn-about">ℹ️ About</button>
+    <button id="creditsBtn" class="btn btn-credits">👥 Credits</button>
+    <button id="exitBtn" class="btn exit">🚪 Exit App</button>
+
+    <div class="quote">“Plan your learning. Conquer your week.”</div>
+  </div>
+
+  <footer>© 2025 AI Study Planner | Created by Amrut Dabir & Rushikesh Katare</footer>
+
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('aboutModal')">&times;</span>
+      <h2>About AI Study Planner</h2>
+      <p>
+        This planner intelligently generates your daily and weekly study schedules using offline algorithms — no internet required.
+      </p>
+      <p>
+        You can switch between planners anytime using the navigation menu. Customize your study hours, subjects, and difficulty to create a balanced plan!
+      </p>
+    </div>
+  </div>
+
+  <!-- Credits Modal -->
+  <div id="creditsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('creditsModal')">&times;</span>
+      <h2>Credits</h2>
+      <p><strong>Developed by:</strong><br />Amrut Dabir (Roll No. 10)<br />Rushikesh Katare (Roll No. 59)</p>
+      <p><strong>Tech Stack:</strong> HTML, CSS, JavaScript (Offline Mode)</p>
+      <p><strong>Features:</strong> Auto schedule generation, customizable settings, and responsive design.</p>
+    </div>
+  </div>
+
+  <script>
+    // Modal controls
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+    function openModal(id) {
+      document.getElementById(id).style.display = "block";
+    }
+
+    document.getElementById("aboutBtn").onclick = () => openModal("aboutModal");
+    document.getElementById("creditsBtn").onclick = () => openModal("creditsModal");
+
+    // Exit Button (closes tab or window)
+    document.getElementById("exitBtn").onclick = () => {
+      if (confirm("Are you sure you want to exit the planner?")) {
+        window.close();
+      }
+    };
+
+    // Close modals by clicking outside
+    window.onclick = function (event) {
+      const modals = [aboutModal, creditsModal];
+      modals.forEach((m) => {
+        if (event.target === m) m.style.display = "none";
+      });
+    };
+  </script>
+</body>
+</html>
